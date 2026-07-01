@@ -1,0 +1,32 @@
+name: Auto-Scrape Lioden Wiki Traits
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Executes automatically every Sunday at midnight
+  workflow_dispatch: # Allows you to run it manually from the GitHub interface
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Scraper Dependencies
+        run: npm install jsdom
+
+      - name: Run Cloud Scraper
+        run: node scrape_traits.js
+
+      - name: Commit and Push Updated JSON
+        run: |
+          git config --global user.name "GitHub Actions"
+          git.config --global user.email "actions@github.com"
+          git add traits.json
+          git commit -m "Automated update of breed-only traits" || exit 0
+          git push
